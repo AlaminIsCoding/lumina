@@ -21,6 +21,7 @@
         "utils/storage.js", 
         "content/highlighter.js", 
         "content/ui.js",
+        "content/navigator.js",
         "content/content.js"
       ],
       "css": ["content/styles.css"],

@@ -23,92 +23,114 @@ const LuminaController = {
                 Highlighter.drawHighlight(data.id, data.color, data);
             });
         }
+
+        Navigator.update(savedHighlights);
     },
 
-/**
-     * Event Listeners for the Toolbar Buttons
-     */
     attachToolbarListeners: (toolbar) => {
-        // --- CRITICAL FIX ---
-        // Prevent the toolbar from "stealing" focus when clicked.
-        // This ensures the text remains selected on the page.
-        toolbar.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-        });
+            toolbar.addEventListener('mousedown', (e) => e.preventDefault());
 
-        // Track hover state
-        toolbar.addEventListener('mouseenter', () => { LuminaController.isInteractingWithToolbar = true; });
-        toolbar.addEventListener('mouseleave', () => { LuminaController.isInteractingWithToolbar = false; });
+            toolbar.addEventListener('mouseenter', () => { LuminaController.isInteractingWithToolbar = true; });
+            toolbar.addEventListener('mouseleave', () => { LuminaController.isInteractingWithToolbar = false; });
 
-        // Handle button clicks
-        toolbar.addEventListener('click', async (e) => {
-            e.stopPropagation(); // Stop click from bubbling to page
-            
-            // Check if a color circle was clicked
-            const colorBtn = e.target.closest('.lumina-color-btn');
-            if (colorBtn) {
-                const color = colorBtn.dataset.color;
-                await LuminaController.createHighlight(color);
-                UIManager.hide();
-                return;
-            }
-
-            // Check if note button was clicked
-            const noteBtn = e.target.closest('[data-action="annotate"]');
-            if (noteBtn) {
-                // Temporarily store selection because prompt() might clear it in some browsers
-                const note = prompt("Enter your note:"); 
-                if (note !== null) {
-                    await LuminaController.createHighlight("#ffeb3b", note);
+            toolbar.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                
+                // 1. Color Click
+                const colorBtn = e.target.closest('.lumina-color-btn');
+                if (colorBtn) {
+                    const color = colorBtn.dataset.color;
+                    await LuminaController.createHighlight(color);
+                    UIManager.hide();
+                    return;
                 }
-                UIManager.hide();
-            }
-        });
-    },
+
+                // 2. Note Button Click -> Switch to Input Mode
+                const noteBtn = e.target.closest('[data-action="annotate-mode"]');
+                if (noteBtn) {
+                    // Do NOT create highlight yet. Just show the input box.
+                    UIManager.toggleInputMode(true);
+                }
+            });
+        },
 
     /**
      * Event Listeners for the Web Page
      */
     attachPageListeners: () => {
-        // 1. MOUSE UP: Detect text selection
-        document.addEventListener('mouseup', (e) => {
-            // Wait slightly for selection to finalize
-            setTimeout(() => {
-                const selection = window.getSelection();
-                
-                // Use the capture method from Phase 2a to validate selection
-                const payload = Highlighter.captureSelection();
-
-                if (payload && !selection.isCollapsed) {
-                    // Valid selection found!
-                    const range = selection.getRangeAt(0);
-                    const rect = range.getBoundingClientRect();
+            // MOUSE UP
+            document.addEventListener('mouseup', (e) => {
+                setTimeout(() => {
+                    const selection = window.getSelection();
                     
-                    // Calculate position (centered above selection)
-                    // We add window.scrollY to account for scrolling
-                    const x = rect.left + (rect.width / 2) - (80); // 80 is approx half toolbar width
-                    const y = rect.top + window.scrollY - 50; // 50px above text
+                    // 1. CAPTURE DATA NOW
+                    const payload = Highlighter.captureSelection();
 
-                    UIManager.show(x, y);
+                    if (payload && !selection.isCollapsed) {
+                        const range = selection.getRangeAt(0);
+                        const rect = range.getBoundingClientRect();
+                        const x = rect.left + (rect.width / 2) - 80;
+                        const y = rect.top + window.scrollY - 50;
+
+                        // 2. PASS DATA TO UI MANAGER
+                        UIManager.show(x, y, payload);
+                    }
+                }, 10);
+            });
+
+            // MOUSE DOWN
+            document.addEventListener('mousedown', (e) => {
+                if (!LuminaController.isInteractingWithToolbar) {
+                    UIManager.hide();
                 }
-            }, 10);
-        });
+            });
+            let hoverTimeout;
 
-        // 2. MOUSE DOWN: Hide toolbar if clicking away
-        document.addEventListener('mousedown', (e) => {
-            if (!LuminaController.isInteractingWithToolbar) {
-                UIManager.hide();
-            }
-        });
-    },
+            document.addEventListener('mouseover', (e) => {
+                // Check if we are hovering a highlighted element
+                if (e.target.classList.contains('lumina-highlight')) {
+                    clearTimeout(hoverTimeout); // Cancel any hide timer
+                    
+                    const mark = e.target;
+                    const rect = mark.getBoundingClientRect();
+                    const note = mark.dataset.note;
+                    const id = mark.dataset.id;
+
+                    // Show card if there is a note, OR we could show it for all to allow delete
+                    // Let's show for all, but text differs if no note.
+                    UIManager.showHoverCard(
+                        rect.left + window.scrollX, 
+                        rect.bottom + window.scrollY, 
+                        note, 
+                        id
+                    );
+                } else if (e.target.closest('#lumina-hover-card')) {
+                    // If hovering the card itself, keep it open
+                    clearTimeout(hoverTimeout);
+                }
+            });
+
+            document.addEventListener('mouseout', (e) => {
+                if (e.target.classList.contains('lumina-highlight') || e.target.closest('#lumina-hover-card')) {
+                    // Delay hiding to allow moving mouse from mark to card
+                    hoverTimeout = setTimeout(() => {
+                        UIManager.hideHoverCard();
+                    }, 300);
+                }
+            });
+        },
 
     /**
      * Core Action: Create and Save Highlight
      */
-    createHighlight: async (color = "#ffeb3b", note = "") => {
-        const selectionData = Highlighter.captureSelection();
+    createHighlight: async (color = "#ffeb3b", note = "", cachedPayload = null) => {
+        // Use cached payload if provided, otherwise try to capture live
+        const selectionData = cachedPayload || Highlighter.captureSelection();
         
-        if (!selectionData) return;
+        if (!selectionData) {
+            console.log("Lumina: No valid selection found to highlight.");
+            return;
+        }
 
         const newHighlight = {
             ...selectionData,
@@ -117,12 +139,11 @@ const LuminaController = {
         };
 
         const savedRecord = await StorageManager.addHighlight(window.location.href, newHighlight);
-        
-        // Draw visually
         Highlighter.drawHighlight(savedRecord.id, savedRecord.color, savedRecord);
-
-        // Clear selection
         window.getSelection().removeAllRanges();
+
+        const allHighlights = await StorageManager.getHighlights(window.location.href);
+        Navigator.update(allHighlights);
         
         return savedRecord;
     }

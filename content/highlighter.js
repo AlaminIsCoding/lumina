@@ -43,49 +43,41 @@ const Highlighter = {
      * Takes the stored JSON data and paints the highlight on the screen.
      */
     drawHighlight: (highlightId, color, rangeData) => {
-        try {
-            const range = document.createRange();
+            try {
+                const range = document.createRange();
+                const startNode = Highlighter.getNodeByXPath(rangeData.startXPath);
+                const endNode = Highlighter.getNodeByXPath(rangeData.endXPath);
 
-            // Locate the specific text nodes in the DOM
-            const startNode = Highlighter.getNodeByXPath(rangeData.startXPath);
-            const endNode = Highlighter.getNodeByXPath(rangeData.endXPath);
+                if (!startNode || !endNode) return false;
 
-            if (!startNode || !endNode) {
-                console.warn("Lumina: Could not locate original text nodes for highlight", highlightId);
+                range.setStart(startNode, rangeData.startOffset);
+                range.setEnd(endNode, rangeData.endOffset);
+
+                const mark = document.createElement('mark');
+                mark.className = 'lumina-highlight';
+                mark.dataset.id = highlightId;
+                mark.style.backgroundColor = color;
+                mark.style.color = 'inherit'; 
+                mark.style.cursor = 'pointer';
+
+                // --- NEW: Add Note Metadata to DOM ---
+                if (rangeData.note) {
+                    mark.dataset.hasNote = "true";
+                    mark.dataset.note = rangeData.note; // Store note for easy retrieval
+                }
+                // -------------------------------------
+
+                const fragment = range.extractContents();
+                mark.appendChild(fragment);
+                range.insertNode(mark);
+
+                return true;
+
+            } catch (e) {
+                console.error("Lumina: Error drawing highlight", e);
                 return false;
             }
-
-            // Reconstruct the range
-            range.setStart(startNode, rangeData.startOffset);
-            range.setEnd(endNode, rangeData.endOffset);
-
-            // Create a wrapper element
-            // Note: Range.surroundContents() is strict and fails if spanning multiple block elements (like <p>).
-            // For a robust extension, we use a safer extraction method:
-            const mark = document.createElement('mark');
-            mark.className = 'lumina-highlight';
-            mark.dataset.id = highlightId;
-            mark.style.backgroundColor = color;
-            mark.style.color = 'inherit'; // Keep text color original
-            mark.style.cursor = 'pointer';
-
-            // Safe wrapping technique
-            // 1. Extract the contents
-            const fragment = range.extractContents();
-            // 2. Append contents to our mark
-            mark.appendChild(fragment);
-            // 3. Insert mark back into the range
-            range.insertNode(mark);
-
-            // Clear selection after drawing
-            window.getSelection().removeAllRanges();
-            return true;
-
-        } catch (e) {
-            console.error("Lumina: Error drawing highlight", e);
-            return false;
-        }
-    },
+      },
 
     /**
      * UTILITY: Generate XPath for a node
