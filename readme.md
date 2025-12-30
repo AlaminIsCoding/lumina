@@ -1,7 +1,8 @@
 # Lumina - Web Highlighter & Annotator
 
 <div align="center">
-  <img src="icons/icon128.png" alt="Lumina Logo" width="100" height="100">
+  <!-- Updated path to point inside src folder -->
+  <img src="src/icons/icon128.png" alt="Lumina Logo" width="100" height="100">
   <br>
   <b>Illuminating the web, one highlight at a time.</b>
   <br>
@@ -30,18 +31,30 @@ Unlike other highlighting tools that require accounts or cloud sync, Lumina runs
 *   **🔒 Privacy First:** No backend, no tracking, no accounts. Data lives in `chrome.storage.local`.
 *   **⚡ Smart Anchoring:** Uses robust DOM pathing to ensure highlights stick even if the page structure changes slightly.
 
+## 📸 Screenshots
+
+| Highlighting & Notes | The Dashboard |
+|:---:|:---:|
+| ![Toolbar](preview/toolbar.png) | ![Dashboard](preview/dashboard.png) |
+| *Intuitive floating tools* | *Organized knowledge base* |
+
+| Navigator Widget | Inline Hover Cards |
+|:---:|:---:|
+| ![Navigator](preview/navigator.png) | ![Hover Card](preview/hover.png) |
+| *Fast travel through articles* | *Review notes instantly* |
+
 ## 🚀 Installation (Developer Mode)
 
 Since this is a personal project, it is installed via Chrome's "Developer Mode".
 
 1.  **Clone or Download** this repository.
     ```bash
-        https://github.com/AlaminIsCoding/lumina.git
+    git clone https://github.com/AlaminIsCoding/lumina.git
     ```
 2.  Open Google Chrome and navigate to `chrome://extensions`.
 3.  Toggle **Developer mode** in the top right corner.
 4.  Click **Load unpacked**.
-5.  Select the folder where you cloned/downloaded this repository.
+5.  **Important:** Select the **`src`** folder inside the downloaded project.
 6.  Lumina is now active! Pin it to your toolbar for easy access.
 
 ## 🛠️ Usage Guide
@@ -68,23 +81,25 @@ Since this is a personal project, it is installed via Chrome's "Developer Mode".
 Lumina follows a modular "Service-based" architecture for maintainability.
 
 ```text
-/lumina-highlighter
-├── /manifest.json          # Configuration & Permissions
-├── /background/
-│   └── background.js       # Service worker (Extension events)
-├── /content/               # Content Scripts (Runs on webpages)
-│   ├── content.js          # Event listeners & logic glue
-│   ├── highlighter.js      # Logic for DOM range serialization
-│   ├── ui.js               # Generates Toolbars & Hover cards
-│   ├── navigator.js        # "Fast Travel" widget logic
-│   └── styles.css          # UI Styling
-├── /dashboard/             # The Organizer Page
-│   ├── dashboard.html
-│   ├── dashboard.css
-│   └── dashboard.js
-└── /utils/
-    ├── storage.js          # Wrapper for chrome.storage.local
-    └── icons.js            # SVG Icon collection
+/lumina (Root)
+├── README.md
+├── /screenshots/           # Images for documentation
+└── /src/                   # Extension Source Code
+    ├── manifest.json       # Configuration & Permissions
+    ├── /background/
+    │   └── background.js
+    ├── /content/
+    │   ├── content.js      # Event listeners
+    │   ├── highlighter.js  # Core logic
+    │   ├── ui.js           # Floating UI
+    │   ├── navigator.js    # Widget logic
+    │   └── styles.css
+    ├── /dashboard/
+    │   ├── dashboard.html
+    │   └── dashboard.js
+    └── /utils/
+        ├── storage.js
+        └── icons.js
 ```
 
 ## 🔮 Future Roadmap
