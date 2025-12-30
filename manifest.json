@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Lumina - Web Highlighter",
+  "version": "1.0",
+  "description": "Highlight, annotate, and organize web text.",
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "action": {
+    "default_title": "Open Lumina Dashboard"
+  },
+  "background": {
+    "service_worker": "background/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "utils/icons.js", 
+        "utils/storage.js", 
+        "content/highlighter.js", 
+        "content/ui.js",
+        "content/content.js"
+      ],
+      "css": ["content/styles.css"],
+      "run_at": "document_end"
+    }
+  ]
+}

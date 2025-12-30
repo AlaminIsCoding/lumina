@@ -1,0 +1,103 @@
+/* =========================================
+   Theme Variables
+   ========================================= */
+:root {
+    --lumina-yellow: #ffeb3b;
+    --lumina-green: #a5d6a7;
+    --lumina-blue: #90caf9;
+    --lumina-pink: #f48fb1;
+    --lumina-slate: #1e293b;
+    --lumina-white: #ffffff;
+    --lumina-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* =========================================
+   Highlight Styles
+   ========================================= */
+/* The class applied to wrapped text */
+mark.lumina-highlight {
+    border-radius: 2px;
+    padding: 2px 0;
+    transition: background-color 0.2s ease;
+    mix-blend-mode: multiply; /* Helps text remain readable */
+}
+
+/* Hover effect to indicate interactivity */
+mark.lumina-highlight:hover {
+    filter: brightness(0.95); 
+}
+
+/* Optional: Dark mode adjustments for web pages */
+@media (prefers-color-scheme: dark) {
+    mark.lumina-highlight {
+        mix-blend-mode: normal;
+        color: #000; /* Force black text on highlights for contrast */
+    }
+}
+
+/* =========================================
+   Floating Toolbar (The "Widget")
+   ========================================= */
+#lumina-toolbar {
+    position: absolute;
+    z-index: 99999; /* Must sit on top of everything */
+    display: flex;
+    gap: 8px;
+    background-color: var(--lumina-slate);
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: var(--lumina-shadow);
+    
+    /* Initially hidden */
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* Active State */
+#lumina-toolbar.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* Toolbar Buttons */
+.lumina-btn {
+    background: transparent;
+    border: none;
+    color: var(--lumina-white);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+}
+
+.lumina-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Color Circles */
+.lumina-color-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.lumina-color-btn:hover {
+    transform: scale(1.1);
+    border-color: var(--lumina-white);
+}
+
+/* Vertical Divider */
+.lumina-divider {
+    width: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 4px;
+}

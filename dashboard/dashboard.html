@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumina Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar: Lists Websites -->
+        <aside class="sidebar">
+            <div class="brand">
+                <h2>Lumina</h2>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search notes...">
+            </div>
+
+            <div class="nav-header">Websites</div>
+            <ul id="domain-list" class="domain-list">
+                <!-- Javascript will inject domains here -->
+            </ul>
+        </aside>
+
+        <!-- Main Content: Lists Highlights -->
+        <main class="main-content">
+            <header class="top-bar">
+                <h1 id="page-title">All Highlights</h1>
+                <div class="stats" id="stats-display">0 notes</div>
+            </header>
+
+            <div id="highlights-list" class="highlights-grid">
+                <!-- Javascript will inject highlight cards here -->
+                
+                <!-- Empty State (Default) -->
+                <div class="empty-state">
+                    <p>Select a website from the sidebar to view notes.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../utils/icons.js"></script>
+    <script src="../utils/storage.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>
