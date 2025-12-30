@@ -36,7 +36,7 @@ Since this is a personal project, it is installed via Chrome's "Developer Mode".
 
 1.  **Clone or Download** this repository.
     ```bash
-    git clone https://github.com/AlaminIsCoding/lumina-highlighter.git
+        https://github.com/AlaminIsCoding/lumina.git
     ```
 2.  Open Google Chrome and navigate to `chrome://extensions`.
 3.  Toggle **Developer mode** in the top right corner.
